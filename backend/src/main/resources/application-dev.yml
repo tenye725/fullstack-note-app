@@ -1,0 +1,41 @@
+# =====================================================
+#dev 개발환경에서 H2를 사용하는 경우 설정
+# --spring.profiles
+# =====================================================
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_NO_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop #생성 후 삭제
+    show-sql: false
+    open-in-view: false         # OSIV 비활성화 (성능)
+  h2:
+    console:
+      enabled: true   #console 접급 허용
+
+server:
+  port: ${SERVER_PORT:8080}
+
+# CORS 허용 출처 (Next.js FE ALB DNS)
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+
+# Actuator (ALB 헬스 체크용)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.example.noteapp: DEBUG
