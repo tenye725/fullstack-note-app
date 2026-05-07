@@ -102,18 +102,20 @@ jobs:
             --auto-scaling-group-names ${BACKEND_ASG} \
             --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
             --output text | tr '\t' ' ')
+          COMMANDS_JSON='{
+            "commands": [
+              "aws s3 cp s3://fullstack-deploy-test7/backend/note-app-latest.jar /opt/app/note-app.jar --region ap-northeast-2",
+              "systemctl restart note-app",
+              "sleep 15",
+              "STATUS=$(curl -sf -o /dev/null -w \"%{http_code}\" http://localhost:8080/actuator/health)",
+              "[ \"$STATUS\" = \"200\" ] && echo OK || (echo FAIL && exit 1)"
+            ]
+          }'
+            
           for IID in $IDS; do
             CMD=$(aws ssm send-command --instance-ids $IID \
               --document-name AWS-RunShellScript \
-              --parameters 'commands=[
-                aws s3 cp s3://"${S3_BUCKET}"/backend/note-app-latest.jar /opt/app/note-app-new.jar,
-                systemctl stop note-app,
-                mv /opt/app/note-app-new.jar /opt/app/note-app.jar,
-                systemctl start note-app,
-                sleep 10,
-                STATUS=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health),
-                [ "$STATUS" = "200" ] && echo OK || exit 1
-              ]' \
+              --parameters "$COMMANDS_JSON" \
               --timeout-seconds 300 \
               --query Command.CommandId --output text)
             for i in $(seq 1 30); do sleep 10
@@ -142,26 +144,29 @@ jobs:
             --auto-scaling-group-names ${FRONTEND_ASG} \
             --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
             --output text | tr '\t' ' ')
+          COMMANDS_JSON='{
+            "commands": [
+              "aws s3 cp s3://fullstack-deploy-test7/frontend/frontend-latest.zip /tmp/fe.zip --region ap-northeast-2",
+              "unzip -o /tmp/fe.zip -d /tmp/fe-new",
+              "sudo -u ubuntu pm2 stop note-frontend 2>/dev/null || true",
+              "rm -rf /opt/frontend/.next /opt/frontend/public",
+              "cp -r /tmp/fe-new/.next /opt/frontend/",
+              "cp -r /tmp/fe-new/public /opt/frontend/ 2>/dev/null || true",
+              "cp /tmp/fe-new/package.json /opt/frontend/",
+              "cd /opt/frontend && npm install --production",
+              "chown -R ubuntu:ubuntu /opt/frontend",
+              "sudo -u ubuntu pm2 start npm --name note-frontend -- start",
+              "sudo -u ubuntu pm2 save",
+              "sleep 5",
+              "STATUS=$(curl -sf -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+              "[ \"$STATUS\" = \"200\" ] && echo OK || (echo FAIL && exit 1)",
+              "rm -rf /tmp/fe.zip /tmp/fe-new"
+            ]
+          }'
           for IID in $IDS; do
             CMD=$(aws ssm send-command --instance-ids $IID \
               --document-name AWS-RunShellScript \
-              --parameters 'commands=[
-                aws s3 cp s3://"${S3_BUCKET}"/frontend/frontend-latest.zip /tmp/fe.zip,
-                unzip -o /tmp/fe.zip -d /tmp/fe-new,
-                pm2 stop note-frontend 2>/dev/null || true,
-                rm -rf /opt/frontend/.next /opt/frontend/public,
-                cp -r /tmp/fe-new/frontend/.next /opt/frontend/,
-                cp -r /tmp/fe-new/frontend/public /opt/frontend/,
-                cp /tmp/fe-new/frontend/package.json /opt/frontend/,
-                cd /opt/frontend && npm install --production,
-                chown -R ubuntu:ubuntu /opt/frontend,
-                pm2 start npm --name note-frontend -- start,
-                pm2 save,
-                sleep 5,
-                STATUS=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000),
-                [ "$STATUS" = "200" ] && echo OK || exit 1,
-                rm -rf /tmp/fe.zip /tmp/fe-new
-              ]' \
+              --parameters "$COMMANDS_JSON"\
               --timeout-seconds 360 \
               --query Command.CommandId --output text)
             for i in $(seq 1 36); do sleep 10
