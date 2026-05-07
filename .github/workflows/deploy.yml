@@ -106,7 +106,7 @@ jobs:
             CMD=$(aws ssm send-command --instance-ids $IID \
               --document-name AWS-RunShellScript \
               --parameters 'commands=[
-                aws s3 cp s3://${S3_BUCKET}/backend/note-app-latest.jar /opt/app/note-app-new.jar,
+                aws s3 cp s3://"${S3_BUCKET}"/backend/note-app-latest.jar /opt/app/note-app-new.jar,
                 systemctl stop note-app,
                 mv /opt/app/note-app-new.jar /opt/app/note-app.jar,
                 systemctl start note-app,
@@ -146,7 +146,7 @@ jobs:
             CMD=$(aws ssm send-command --instance-ids $IID \
               --document-name AWS-RunShellScript \
               --parameters 'commands=[
-                aws s3 cp s3://${S3_BUCKET}/frontend/frontend-latest.zip /tmp/fe.zip,
+                aws s3 cp s3://"${S3_BUCKET}"/frontend/frontend-latest.zip /tmp/fe.zip,
                 unzip -o /tmp/fe.zip -d /tmp/fe-new,
                 pm2 stop note-frontend 2>/dev/null || true,
                 rm -rf /opt/frontend/.next /opt/frontend/public,
