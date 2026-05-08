@@ -150,7 +150,7 @@ jobs:
             --output text | tr '\t' ' ')
           COMMANDS_JSON='{
             "commands": [
-              "aws s3 cp s3://fullstack-deploy-test7/frontend/frontend-latest.zip /tmp/fe.zip --region ap-northeast-2",
+              "aws s3 cp s3://fullstack-deploy-tenye725/frontend/frontend-latest.zip /tmp/fe.zip --region ap-northeast-2",
               "unzip -o /tmp/fe.zip -d /tmp/fe-new",
               "sudo -u ubuntu pm2 stop note-frontend 2>/dev/null || true",
               "rm -rf /opt/frontend/.next /opt/frontend/public",
