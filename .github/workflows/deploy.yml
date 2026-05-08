@@ -55,6 +55,7 @@ jobs:
             frontend/package.json
             frontend/package-lock.json
             frontend/next.config.ts
+            frontend/node_modules
  
   # ── Job 3: S3 업로드 (빌드 결과물) ──────────────────
   upload-to-s3:
