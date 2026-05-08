@@ -46,16 +46,20 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Prepare Arifact
+        run: |
+          mkdir -p frontend
+          cp -r .next ./frontend/
+          cp -r public ./frontend/ 2>/dev/null || true
+          cp package.json package-lock.json next.config.ts ./frontend/ 2>/dev/null || true
+          cd ./frontend
+          zip -r ../frontend.zip .next/ public/ package.json package-lock.json next.config.ts
+          ls -l .
       - uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: |
-            frontend/.next
-            frontend/public
-            frontend/package.json
-            frontend/package-lock.json
-            frontend/next.config.ts
-            frontend/node_modules
+          path: frontend/frontend.zip
+            
  
   # ── Job 3: S3 업로드 (빌드 결과물) ──────────────────
   upload-to-s3:
@@ -80,10 +84,9 @@ jobs:
           aws s3 cp ./artifacts/backend/note-app.jar \
             s3://${S3_BUCKET}/backend/note-app-latest.jar
           # 프론트엔드
-          cd artifacts && zip -r frontend-${SHORT_SHA}.zip frontend/
-          aws s3 cp frontend-${SHORT_SHA}.zip \
+          aws s3 cp ./artifacts/frontend/frontend.zip \
             s3://${S3_BUCKET}/frontend/frontend-${SHORT_SHA}.zip
-          aws s3 cp frontend-${SHORT_SHA}.zip \
+          aws s3 cp ./artifacts/frontend/frontend.zip \
             s3://${S3_BUCKET}/frontend/frontend-latest.zip
           echo "SHORT_SHA=${SHORT_SHA}" >> $GITHUB_ENV
  
