@@ -12,8 +12,8 @@ spring:
       &serverTimezone=Asia/Seoul
       &characterEncoding=UTF-8
       &allowPublicKeyRetrieval=true
-    username: ${DB_USER:root}
-    password: ${DB_PASS:1234}
+    username: ${DB_USER:admin}
+    password: ${DB_PASS:root1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -23,7 +23,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate        # 운영: validate (스키마 자동 변경 금지)
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
