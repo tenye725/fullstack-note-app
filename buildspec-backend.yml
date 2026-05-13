@@ -4,15 +4,13 @@ phases:
   install:
     runtime-versions:
       java: corretto17
-  pre_build:
-    commands:
-      - echo "=== 백엔드 빌드 시작 $(date) ==="
-      - java -version
+
   build:
     commands:
       - cd backend && chmod +x gradlew && ./gradlew bootJar -x test
   post_build:
     commands:
+      - cd ..
       - mkdir -p deploy-backend
       - cp backend/build/libs/note-app.jar deploy-backend/
       - cp backend/Procfile deploy-backend/
