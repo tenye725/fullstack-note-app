@@ -1,0 +1,19 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - node -v
+        - nmp ci
+    build:
+      commands:
+        - echo "Building Next.js app...."
+        - npm run build
+  artifacts:
+    baseDirectory: .next/standalone
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modeules/**/*
+      - .next/cache/**/*
