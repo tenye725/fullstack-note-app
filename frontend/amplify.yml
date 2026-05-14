@@ -5,10 +5,10 @@ applications:
       phases:
         preBuild:
           commands:
+            - node -v
             - npm ci
         build:
           commands:
-            - echo "Building Next.js app....."
             - npm run build
       artifacts:
         baseDirectory: .next
@@ -16,5 +16,5 @@ applications:
           - '**/*'
       cache:
         paths:
-          - node_modules/**/*
           - .next/cache/**/*
+          - node_modules/**/*
