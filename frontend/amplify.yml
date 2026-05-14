@@ -10,7 +10,7 @@ frontend:
         - echo "Building Next.js app...."
         - npm run build
   artifacts:
-    baseDirectory: .next/standalone
+    baseDirectory: .next
     files:
       - '**/*'
   cache:
